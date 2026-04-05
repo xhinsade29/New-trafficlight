@@ -317,14 +317,14 @@ header h1{font-family:'Pacifico',cursive;color:#fde8e0;font-size:1.3rem;text-sha
 /* wheel animation elements (hidden, used for JS wheel spin tracking) */
 .wheelL,.wheelR{
   position:absolute;
-  bottom:6px;
-  width:20px;
-  height:20px;
+  bottom:8px;
+  width:26px;
+  height:26px;
   opacity:0;
   pointer-events:none;
 }
-.wheelL{left:18px}
-.wheelR{right:18px}
+.wheelL{left:22px}
+.wheelR{right:22px}
 .spinning{animation:wspin .10s linear infinite}
 @keyframes wspin{to{transform:rotate(360deg)}}
 
@@ -502,11 +502,11 @@ header h1{font-family:'Pacifico',cursive;color:#fde8e0;font-size:1.3rem;text-sha
 
     <!-- RABBIT CROSSING - now outside road, at sidewalk level -->
     <div class="rabbitgrp" id="rabbitGrp">
-      <img src="rabbit_crossing.png" alt="rabbit" width="65" height="65" id="rb0" class="rabbit-img">
-      <img src="rabbit_crossing1.png" alt="rabbit" width="60" height="60" id="rb1" class="rabbit-img">
-      <img src="rabbit_crossing2.png" alt="rabbit" width="62" height="62" id="rb2" class="rabbit-img">
-      <img src="rabbit_crossing3.png" alt="rabbit" width="58" height="58" id="rb3" class="rabbit-img">
-      <img src="rabbit_crossing4.png" alt="rabbit" width="68" height="68" id="rb4" class="rabbit-img">
+      <img src="rabbit_crossing.png" alt="rabbit" width="95" height="95" id="rb0" class="rabbit-img">
+      <img src="rabbit_crossing1.png" alt="rabbit" width="90" height="90" id="rb1" class="rabbit-img">
+      <img src="rabbit_crossing2.png" alt="rabbit" width="93" height="93" id="rb2" class="rabbit-img">
+      <img src="rabbit_crossing3.png" alt="rabbit" width="88" height="88" id="rb3" class="rabbit-img">
+      <img src="rabbit_crossing4.png" alt="rabbit" width="100" height="100" id="rb4" class="rabbit-img">
     </div>
 
     <!-- Road with 4 lanes -->
@@ -600,68 +600,68 @@ header h1{font-family:'Pacifico',cursive;color:#fde8e0;font-size:1.3rem;text-sha
 
     <!-- ── LANE 1: right-going cars (outer right) - LEFT TO RIGHT ── -->
     <div class="car1w halt" id="c0" style="left:-165px">
-      <img src="car.png" alt="car" width="108" height="60">
+      <img src="car.png" alt="car" width="140" height="78">
       <div class="wheelL" id="wc0L"></div>
       <div class="wheelR" id="wc0R"></div>
     </div>
     <div class="car1w halt" id="c0b" style="left:-550px">
-      <img src="car7.png" alt="car" width="108" height="60">
+      <img src="car7.png" alt="car" width="140" height="78">
       <div class="wheelL" id="wc0bL"></div>
       <div class="wheelR" id="wc0bR"></div>
     </div>
     <div class="car1w halt" id="c0c" style="left:-820px">
-      <img src="car9.png" alt="car" width="108" height="60">
+      <img src="car9.png" alt="car" width="140" height="78">
       <div class="wheelL" id="wc0cL"></div>
       <div class="wheelR" id="wc0cR"></div>
     </div>
 
     <!-- ── LANE 2: left-going cars (inner right) - RIGHT TO LEFT -->
     <div class="car2w drive" id="c2" style="right:-165px">
-      <img src="car5.png" alt="car" width="108" height="60">
+      <img src="car5.png" alt="car" width="140" height="78">
       <div class="wheelL" id="w2L"></div>
       <div class="wheelR" id="w2R"></div>
     </div>
     <div class="car2w drive" id="c2b" style="right:-430px">
-      <img src="car8.png" alt="car" width="108" height="60">
+      <img src="car8.png" alt="car" width="140" height="78">
       <div class="wheelL" id="w2bL"></div>
       <div class="wheelR" id="w2bR"></div>
     </div>
     <div class="car2w drive" id="c2c" style="right:-700px">
-      <img src="car11.png" alt="car" width="108" height="60">
+      <img src="car11.png" alt="car" width="140" height="78">
       <div class="wheelL" id="w2cL"></div>
       <div class="wheelR" id="w2cR"></div>
     </div>
 
     <!-- ── LANE 3: right-going cars (inner left) - LEFT TO RIGHT -->
     <div class="car3w drive" id="c3" style="left:-165px">
-      <img src="car10.png" alt="car" width="108" height="60">
+      <img src="car10.png" alt="car" width="140" height="78">
       <div class="wheelL" id="w3L"></div>
       <div class="wheelR" id="w3R"></div>
     </div>
     <div class="car3w drive" id="c3b" style="left:-430px">
-      <img src="car12.png" alt="car" width="108" height="60">
+      <img src="car12.png" alt="car" width="140" height="78">
       <div class="wheelL" id="w3bL"></div>
       <div class="wheelR" id="w3bR"></div>
     </div>
     <div class="car3w drive" id="c3c" style="left:-700px">
-      <img src="car7.png" alt="car" width="108" height="60">
+      <img src="car7.png" alt="car" width="140" height="78">
       <div class="wheelL" id="w3cL"></div>
       <div class="wheelR" id="w3cR"></div>
     </div>
 
     <!-- ── LANE 4: left-going cars (outer left) - RIGHT TO LEFT -->
     <div class="car4w drive" id="c4" style="right:-165px">
-      <img src="car5.png" alt="car" width="108" height="60">
+      <img src="car5.png" alt="car" width="140" height="78">
       <div class="wheelL" id="w4L"></div>
       <div class="wheelR" id="w4R"></div>
     </div>
     <div class="car4w drive" id="c4b" style="right:-430px">
-      <img src="car8.png" alt="car" width="108" height="60">
+      <img src="car8.png" alt="car" width="140" height="78">
       <div class="wheelL" id="w4bL"></div>
       <div class="wheelR" id="w4bR"></div>
     </div>
     <div class="car4w drive" id="c4c" style="right:-700px">
-      <img src="car12.png" alt="car" width="108" height="60" style="transform:scaleX(-1)">
+      <img src="car12.png" alt="car" width="140" height="78" style="transform:scaleX(-1)">
       <div class="wheelL" id="w4cL"></div>
       <div class="wheelR" id="w4cR"></div>
     </div>
@@ -945,7 +945,7 @@ function initCarPositions(){
   const sl = stopLeft();
   const sr = stopRight();
   const W = $('scene').offsetWidth;
-  const CAR_SPACING = 130; // Space between cars in queue
+  const CAR_SPACING = 170; // Space between cars in queue (increased for larger cars)
   
   // Set stop positions (before zebra) - right-going use sl, left-going use sr
   // Each car in lane stops behind the previous one
@@ -954,7 +954,7 @@ function initCarPositions(){
     const baseStop = cfg.dir === 'right' ? sl : sr;
     // First car (order 0) stops at base, others stop behind
     cfg.stopPos = baseStop - (cfg.order * CAR_SPACING);
-    cfg.zebraPos = cfg.dir === 'right' ? sl + 150 : sr + 150;
+    cfg.zebraPos = cfg.dir === 'right' ? sl + 200 : sr + 200;
     cfg.offScreen = cfg.startOff;
     cfg.endScreen = W + 165;
   });
@@ -1094,15 +1094,15 @@ function stopLeft(){
   const W = $('scene').offsetWidth;
   const zebraCenter = W / 2;
   const zebraLeft = zebraCenter - 60; // half of 120px width
-  // Stop car (108px wide) with 20px gap before zebra
-  return zebraLeft - 108 - 20;
+  // Stop car (140px wide) with 20px gap before zebra
+  return zebraLeft - 140 - 20;
 }
 function stopRight(){
   const W = $('scene').offsetWidth;
   const zebraCenter = W / 2;
   const zebraRight = zebraCenter + 60; // half of 120px width
-  // Stop car (108px wide) with 20px gap before zebra (from right side)
-  return W - zebraRight - 108 - 20;
+  // Stop car (140px wide) with 20px gap before zebra (from right side)
+  return W - zebraRight - 140 - 20;
 }
 
 function allWheels(spin){
