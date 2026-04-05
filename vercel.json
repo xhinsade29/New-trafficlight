@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "name": "bunny-trafficlight",
+  "builds": [
+    { "src": "api.php", "use": "@vercel/php" },
+    { "src": "traffic_dashboard.html", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/api.php", "dest": "/api.php" },
+    { "src": "/(.*)", "dest": "/traffic_dashboard.html" }
+  ],
+  "env": {
+    "MYSQL_HOST": "@mysql_host",
+    "MYSQL_DB": "@mysql_db",
+    "MYSQL_USER": "@mysql_user",
+    "MYSQL_PASS": "@mysql_pass"
+  }
+}

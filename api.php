@@ -15,11 +15,16 @@
  * ═══════════════════════════════════════════════════════════
  */
 
-// Database configuration — UPDATE THESE!
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'traffic_controller');
-define('DB_USER', 'root');      // Change to your MySQL username
-define('DB_PASS', '');          // Change to your MySQL password
+// Database configuration — Uses environment variables for Vercel, falls back to defaults
+$dbHost = getenv('MYSQL_HOST') ?: 'localhost';
+$dbName = getenv('MYSQL_DB') ?: 'traffic_controller';
+$dbUser = getenv('MYSQL_USER') ?: 'root';
+$dbPass = getenv('MYSQL_PASS') ?: '';
+
+define('DB_HOST', $dbHost);
+define('DB_NAME', $dbName);
+define('DB_USER', $dbUser);
+define('DB_PASS', $dbPass);
 
 // Response headers
 header('Content-Type: application/json');
