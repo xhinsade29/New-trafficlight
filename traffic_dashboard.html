@@ -600,7 +600,7 @@ header h1{font-family:'Pacifico',cursive;color:#fde8e0;font-size:1.3rem;text-sha
 
     <!-- ── LANE 1: right-going cars (outer right) - LEFT TO RIGHT ── -->
     <div class="car1w halt" id="c0" style="left:-165px">
-      <img src="car6.png" alt="car" width="108" height="60">
+      <img src="car.png" alt="car" width="108" height="60">
       <div class="wheelL" id="wc0L"></div>
       <div class="wheelR" id="wc0R"></div>
     </div>
@@ -639,7 +639,7 @@ header h1{font-family:'Pacifico',cursive;color:#fde8e0;font-size:1.3rem;text-sha
       <div class="wheelR" id="w3R"></div>
     </div>
     <div class="car3w drive" id="c3b" style="left:-430px">
-      <img src="car6.png" alt="car" width="108" height="60">
+      <img src="car12.png" alt="car" width="108" height="60">
       <div class="wheelL" id="w3bL"></div>
       <div class="wheelR" id="w3bR"></div>
     </div>
@@ -1213,26 +1213,24 @@ function applyScene(light,enabled){
     $('sCar').textContent='🚗'; $('sDucks').textContent='⏸️';
 
   } else if(light==='red'){
-    // RED LIGHT: Cars are queued at stop line, waiting for green
-    // On first run or when enabled, position cars at stop line immediately
+    // RED LIGHT: Cars drive in from off-screen and stop at the line
     ALL_CARS.forEach(id=>{
       const cfg = CAR_CFG[id];
       const pos = carPositions[id];
       
-      // If car is off-screen or not yet positioned, place it at stop line
-      if(carStates[id] === 'exited' || pos <= cfg.startOff + 10 || pos < cfg.stopPos){
-        // Place car at stop line (queued up, ready to go)
-        carStates[id] = 'stopped';
-        carSpeeds[id] = 0;
-        carPositions[id] = cfg.stopPos - (cfg.order * 130); // Queue behind previous car
-        updateCarPosition(id);
+      // If car is off-screen or not yet positioned, start driving from off-screen
+      if(carStates[id] === 'exited' || pos <= cfg.startOff + 10){
+        // Start car from off-screen position and drive toward stop line
+        carStates[id] = 'driving';
+        carSpeeds[id] = cfg.speed;
+        carPositions[id] = cfg.startOff;
         const wheelIdBase = id.startsWith('c0') ? 'w' + id : id.replace(/^c/, 'w');
         const wL = $(wheelIdBase + 'L');
         const wR = $(wheelIdBase + 'R');
-        if(wL) wL.classList.remove('spinning');
-        if(wR) wR.classList.remove('spinning');
+        if(wL) wL.classList.add('spinning');
+        if(wR) wR.classList.add('spinning');
       } else if(pos >= cfg.stopPos && pos <= cfg.stopPos + 65){
-        // Car is at stop line - stop and wait
+        // Car reached stop line - stop and wait
         carStates[id] = 'stopped';
         carSpeeds[id] = 0;
         carPositions[id] = cfg.stopPos;
@@ -1252,7 +1250,7 @@ function applyScene(light,enabled){
         if(wL) wL.classList.add('spinning');
         if(wR) wR.classList.add('spinning');
       }
-      // If car is driving toward stop line, let it continue
+      // Cars driving toward stop line will continue until they reach it, then stop
     });
     if(!carRAF) carRAF = requestAnimationFrame(carRAFLoop);
     pauseAllDashes(); wbox.textContent='🚶';
