@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌸 Bunny Traffic Control</title>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+/* ══ ROOT ══ */
+:root{
+  --plum:#4a1528;--mauve:#b87a9a;--lilac:#d4a8cc;
+  --cream:#fde8e0;--pink:#f5c6d8;
+  --gbg:rgba(255,255,255,0.16);
+  --gbor:rgba(255,255,255,0.32);
+  --gsh:rgba(74,21,40,0.22);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:'Nunito',sans-serif;
+  background:linear-gradient(135deg,#2d0a18 0%,#5a2040 30%,#9a5878 60%,#d4a8cc 85%,#fde8e0 100%);
+  display:flex;flex-direction:column;height:100vh;
+}
+/* ══ HEADER ══ */
+header{
+  background:rgba(45,10,24,0.6);
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-bottom:1px solid rgba(255,255,255,0.14);
+  padding:9px 22px;display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;z-index:200;
+}
+header h1{font-family:'Pacifico',cursive;color:#fde8e0;font-size:1.3rem;text-shadow:0 2px 8px rgba(0,0,0,.5)}
+.conn-badge{
+  background:rgba(255,255,255,0.12);backdrop-filter:blur(10px);
+  color:#fde8e0;font-weight:800;font-size:.73rem;
+  padding:5px 13px;border-radius:999px;border:1px solid rgba(255,255,255,0.28);
+  display:flex;align-items:center;gap:6px;
+}
+.dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.25);transition:background .3s}
+.dot.ok{background:#4caf50;animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.4)}}
+
+/* ══ LAYOUT ══ */
+.main{
+  display:grid;grid-template-columns:284px 1fr;
+  gap:12px;padding:11px 13px;
+  flex:1;min-height:0;overflow:hidden;
+}
+/* ══ GLASS PANEL ══ */
+.panel{display:flex;flex-direction:column;gap:9px;overflow-y:auto;min-height:0}
+.panel::-webkit-scrollbar{width:3px}
+.panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:2px}
+.card{
+  background:var(--gbg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-radius:18px;border:1px solid var(--gbor);
+  padding:13px 15px;
+  box-shadow:0 8px 32px var(--gsh),inset 0 1px 0 rgba(255,255,255,0.38);
+  flex-shrink:0;
+}
+.ctitle{font-family:'Pacifico',cursive;color:#fff;font-size:.8rem;margin-bottom:9px;display:flex;align-items:center;gap:6px;text-shadow:0 1px 5px rgba(0,0,0,.35)}
+
+/* traffic light */
+.lc{display:flex;flex-direction:column;align-items:center;gap:7px}
+.housing{
+  background:rgba(12,3,7,0.78);backdrop-filter:blur(8px);
+  border-radius:16px;padding:11px 13px;
+  display:flex;flex-direction:column;gap:9px;
+  border:1.5px solid rgba(255,255,255,0.1);
+  box-shadow:0 4px 22px rgba(0,0,0,.55),inset 0 0 14px rgba(0,0,0,.35);
+}
+.bulb{width:50px;height:50px;border-radius:50%;border:2px solid rgba(255,255,255,.08);transition:all .35s}
+.rb{background:#3a1a1a;border-color:rgba(255,100,100,.3)}.yb{background:#8a7a30;border-color:rgba(255,220,100,.4)}.gb{background:#0a2a0a;border-color:rgba(100,255,150,.3)}
+.rb.on{background:#ff2040;box-shadow:0 0 32px #ff2040,0 0 64px rgba(255,32,64,.4)}
+.yb.on{background:#ffd600;box-shadow:0 0 32px #ffd600,0 0 64px rgba(255,214,0,.4)}
+.gb.on{background:#00e676;box-shadow:0 0 32px #00e676,0 0 64px rgba(0,230,118,.4)}
+#llbl{font-family:'Pacifico',cursive;font-size:.88rem;color:#fff;text-align:center;text-shadow:0 1px 5px rgba(0,0,0,.4)}
+
+/* buttons */
+.brow{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.btn{
+  font-family:'Nunito',sans-serif;font-weight:800;font-size:.72rem;
+  padding:6px 12px;border-radius:999px;cursor:pointer;transition:all .18s;
+  background:rgba(255,255,255,0.15);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,0.3);color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.3);
+}
+.btn:hover{background:rgba(255,255,255,0.28);transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.22)}
+.br{background:rgba(255,32,64,0.32);border-color:rgba(255,100,120,.45)}
+.by{background:rgba(255,214,0,0.22);border-color:rgba(255,214,0,.45)}
+.bg{background:rgba(0,200,100,0.22);border-color:rgba(0,200,100,.45)}
+.ba{background:rgba(180,122,154,0.32);border-color:rgba(212,168,204,.45)}
+.bt{background:rgba(45,10,24,0.5);border-color:rgba(184,122,154,.45)}
+
+/* timer */
+.bwrap{background:rgba(255,255,255,0.13);border-radius:999px;height:8px;overflow:hidden;border:1px solid rgba(255,255,255,.18)}
+.bar{height:100%;border-radius:999px;background:linear-gradient(90deg,#f5c6d8,#b87a9a,#4a1528);transition:width .95s linear}
+.blbl{font-size:.69rem;color:rgba(255,255,255,.75);text-align:right;margin-top:3px;font-weight:700}
+
+/* stats */
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.sbox{background:rgba(255,255,255,0.1);backdrop-filter:blur(8px);border-radius:11px;padding:9px;text-align:center;border:1px solid rgba(255,255,255,.18)}
+.sval{font-size:1.2rem;font-weight:800;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.3)}
+.slbl{font-size:.6rem;color:rgba(255,255,255,.6);font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+
+/* log */
+.lw{max-height:85px;overflow-y:auto;display:flex;flex-direction:column;gap:3px}
+.lw::-webkit-scrollbar{width:3px}
+.lw::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18);border-radius:2px}
+.le{font-size:.68rem;padding:3px 7px;border-radius:6px;background:rgba(255,255,255,0.09);color:rgba(255,255,255,.88);border-left:2px solid rgba(255,255,255,.3);animation:slin .2s ease}
+@keyframes slin{from{opacity:0;transform:translateX(-5px)}to{opacity:1;transform:translateX(0)}}
+
+/* ══════════════════════════════════════
+   SCENE
+   Layers (bottom→top by z-index):
+     z1  sky
+     z2  clouds/sun
+     z4  butterflies
+     z5  grass-strip (40-60% from bottom)
+     z6  sidewalk (35-40%)
+     z7  road (0-35%)
+     z8  signal pole (sits on sidewalk, appears BEHIND road z-order via stacking context)
+     z9  crossing stripes
+     z15 cars
+     z20 ducks
+   
+   Note: signal pole base is on sidewalk. Its head dangles over 
+   the road visually but is z8 so cars at z15 paint OVER it.
+══════════════════════════════════════ */
+.scene{
+  border-radius:18px;overflow:hidden;position:relative;
+  border:1px solid rgba(255,255,255,.22);
+  box-shadow:0 8px 32px rgba(0,0,0,.28);
+  min-height:0;background:#6dcff6;
+}
+
+/* SKY */
+.sky{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,#5ac8f5 0%,#a0e0f8 38%,#c8f0d0 58%,#7abe48 58%,#58a030 72%)}
+
+/* SUN */
+.sun{position:absolute;top:10px;right:55px;width:46px;height:46px;z-index:2;border-radius:50%;background:radial-gradient(circle,#fffde0,#ffd600);box-shadow:0 0 22px rgba(255,214,0,.55);animation:sunSpin 22s linear infinite}
+@keyframes sunSpin{to{transform:rotate(360deg)}}
+.sr{position:absolute;top:50%;left:50%;width:3px;height:13px;background:rgba(255,214,0,.48);border-radius:2px;transform-origin:50% -22px;margin:-6.5px -1.5px}
+
+/* CLOUDS */
+.cl{position:absolute;background:rgba(255,255,255,.8);border-radius:999px;animation:clft linear infinite;z-index:2}
+@keyframes clft{from{transform:translateX(-200px)}to{transform:translateX(calc(100% + 300px))}}
+
+/* BUTTERFLIES */
+.bf{position:absolute;z-index:4;pointer-events:none;font-size:15px;animation:bfly var(--d,10s) ease-in-out infinite}
+@keyframes bfly{0%{transform:translate(0,0)}30%{transform:translate(70px,-45px)}60%{transform:translate(140px,18px)}80%{transform:translate(55px,-28px)}100%{transform:translate(0,0)}}
+
+/* TREES — behind bushes */
+.trees{
+  position:absolute;left:0;right:0;bottom:31%;height:75%;z-index:5;
+  pointer-events:none;
+}
+.tree{
+  position:absolute;bottom:0;z-index:5;
+}
+.tree img{
+  display:block;
+  object-fit:contain;
+}
+
+/* GRASS STRIP — moved to back with lower z-index */
+.grass{
+  position:absolute;left:0;right:0;bottom:40%;height:20%;z-index:3;
+  background:linear-gradient(180deg,#82c848 0%,#5aaa30 100%);
+  overflow:visible;
+}
+/* BUSHES CONTAINER - in front of trees */
+.bushes{
+  position:absolute;left:0;right:0;bottom:35%;height:25%;z-index:10;
+  pointer-events:none;
+  overflow:visible;
+}
+.bush{position:absolute;bottom:0;z-index:10;overflow:visible;opacity:1}
+/* swaying flowers on bushes */
+.bfl{position:absolute;pointer-events:none;animation:sw var(--sw,3s) ease-in-out infinite;transform-origin:bottom center}
+@keyframes sw{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+/* tulips */
+.tulip{position:absolute;bottom:0;display:flex;flex-direction:column;align-items:center;animation:sw var(--sw,2.8s) ease-in-out infinite;transform-origin:bottom center}
+.tstem{width:3px;height:26px;background:#3a7020;border-radius:2px}
+.thead{width:13px;height:17px;border-radius:50% 50% 40% 40%}
+
+/* SIDEWALK — 35%–40% */
+.sidewalk{
+  position:absolute;left:0;right:0;bottom:35%;height:5%;z-index:6;
+  background:linear-gradient(180deg,#d8c0cc,#c0a8b8);
+  border-top:2px solid rgba(255,255,255,.38);
+}
+
+/* ROAD — 0–35%
+   4 Lanes (bottom→top):
+     Lane 1 (right-going): bottom 0–8.75%
+     Lane 2 (left-going):  bottom 8.75–17.5%
+     Lane 3 (right-going): bottom 17.5–26.25%
+     Lane 4 (left-going):  bottom 26.25–35%
+*/
+.road{
+  position:absolute;left:0;right:0;bottom:0;height:35%;z-index:7;
+  background:linear-gradient(180deg,#887080 0%,#988090 50%,#887080 100%);
+}
+/* centre dashes — 3 lines dividing 4 lanes */
+.cdash{
+  position:absolute;left:0;right:0;height:3px;z-index:9;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.82) 0,rgba(255,255,255,.82) 22px,transparent 22px,transparent 44px);
+  animation:dashmov 1.1s linear infinite;
+}
+.cdash.l1{top:25%}
+.cdash.l2{top:50%}
+.cdash.l3{top:75%}
+.cdash.paused{animation-play-state:paused}
+@keyframes dashmov{to{background-position:-44px 0}}
+
+/* zebra crossing — center of road */
+.zebra{
+  position:absolute;left:50%;top:0;bottom:0;width:120px;z-index:9;
+  transform:translateX(-50%);
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.88) 0,rgba(255,255,255,.88) 14px,transparent 14px,transparent 28px);
+}
+
+/* SIGNAL POLE - raised z-index to be above cars */
+.spole{
+  position:absolute;right:55%;bottom:35%;z-index:20;
+  display:flex;flex-direction:column;align-items:center;
+}
+.phead{
+  background:rgba(10,2,6,0.88);backdrop-filter:blur(6px);
+  border-radius:9px;padding:5px 7px;
+  display:flex;flex-direction:column;gap:4px;
+  border:1.5px solid rgba(255,255,255,.12);
+  box-shadow:0 3px 14px rgba(0,0,0,.55);
+}
+.mb{width:15px;height:15px;border-radius:50%;border:1px solid rgba(255,255,255,.08);transition:all .3s}
+.mrb{background:#120103}.myb{background:#121000}.mgb{background:#011204}
+.mrb.on{background:#ff2040;box-shadow:0 0 9px #ff2040}
+.myb.on{background:#ffd600;box-shadow:0 0 9px #ffd600}
+.mgb.on{background:#00e676;box-shadow:0 0 9px #00e676}
+.pstick{width:5px;border-radius:3px;background:linear-gradient(180deg,#b87a9a,#4a1528)}
+.pbase{width:16px;height:7px;border-radius:3px;background:#4a1528}
+
+/* street lamps - light at TOP of post */
+.streetlamp{position:absolute;z-index:12;display:flex;flex-direction:column;align-items:center}
+.lamp-fixture{position:relative;display:flex;flex-direction:column;align-items:center;z-index:3}
+.lamp-head{width:36px;height:28px;background:#3a3a4a;border-radius:10px 10px 14px 14px;position:relative;z-index:4;display:flex;justify-content:center;align-items:center;margin-bottom:-5px}
+.lamp-bulb{width:20px;height:16px;background:#fff8cc;border-radius:50%;box-shadow:0 0 30px #fff8cc,0 0 60px #ffd700,0 0 90px #ffaa00;animation:lampGlow 2s ease-in-out infinite;z-index:5}
+.lamp-light{position:absolute;top:-40px;left:50%;transform:translateX(-50%);width:300px;height:250px;background:radial-gradient(ellipse at center bottom,rgba(255,248,200,0.7) 0%,rgba(255,248,200,0.4) 20%,rgba(255,248,200,0.15) 40%,transparent 65%);border-radius:50%;pointer-events:none;z-index:1;animation:lightPulse 3s ease-in-out infinite}
+.lamp-arm{width:50px;height:8px;background:#3a3a4a;border-radius:4px;position:relative;z-index:2}
+.lamp-post{width:10px;height:140px;background:linear-gradient(180deg,#3a3a4a,#1a1a24);border-radius:5px;margin-top:-4px}
+@keyframes lampGlow{0%,100%{box-shadow:0 0 40px #fff8cc,0 0 80px #ffd700,0 0 120px #ffaa00;opacity:0.85}50%{box-shadow:0 0 60px #fff8cc,0 0 120px #ffd700,0 0 180px #ffaa00;opacity:1}}
+@keyframes lightPulse{0%,100%{opacity:0.6;transform:translateX(-50%) scale(0.95)}50%{opacity:0.9;transform:translateX(-50%) scale(1.05)}}
+.wsig{position:absolute;right:52%;bottom:35%;z-index:8;display:flex;flex-direction:column;align-items:center}
+.wbox{background:rgba(10,2,6,0.88);backdrop-filter:blur(6px);border-radius:7px;padding:4px 6px;font-size:17px;border:1px solid rgba(255,255,255,.12);text-align:center;min-width:32px}
+
+/* ══ CARS ══
+   Lanes:
+     Lane 1 (right-going): bottom:2%   outer right (LEFT TO RIGHT)
+     Lane 2 (left-going):  bottom:10%  inner right (RIGHT TO LEFT)
+     Lane 3 (right-going): bottom:18%  inner left (LEFT TO RIGHT)
+     Lane 4 (left-going):  bottom:26% outer left (RIGHT TO LEFT)
+   z-index:15 → over pole(z8), road(z7), crossing(z9)
+*/
+/* lane-3 car wrapper (right-going, inner left) - Lane 3 is 17.5-26.25% from bottom */
+.car3w{
+  position:absolute;bottom:19%;z-index:15;
+  display:flex;flex-direction:column;align-items:flex-start;
+}
+.car3w.drive{animation:none}
+.car3w.halt{animation:none}
+
+/* lane-2 car wrapper (left-going, inner right) - Lane 2 is 8.75-17.5% from bottom */
+.car2w{
+  position:absolute;bottom:11%;z-index:15;
+  display:flex;flex-direction:column;align-items:flex-start;
+}
+.car2w.drive{animation:none}
+.car2w.halt{animation:none}
+
+/* lane-1 car wrapper (right-going, outer) - Lane 1 is 0-8.75% from bottom */
+.car1w{
+  position:absolute;bottom:2%;z-index:15;
+  display:flex;flex-direction:column;align-items:flex-start;
+}
+.car1w.drive{animation:none}
+.car1w.halt{animation:none}
+
+/* lane-4 car wrapper (left-going, outer left) - Lane 4 is 26.25-35% from bottom */
+.car4w{
+  position:absolute;bottom:28%;z-index:15;
+  display:flex;flex-direction:column;align-items:flex-start;
+}
+.car4w.drive{animation:none}
+.car4w.halt{animation:none}
+
+/* Animation for left-going traffic (from stop line through intersection) */
+@keyframes drL{
+  from{right:var(--start, -165px)}
+  to{right:100%}
+}
+
+/* car image styling */
+.car1w img, .car2w img, .car3w img, .car4w img, .qw img{
+  display:block;
+  position:relative;
+}
+
+/* queue cars */
+.qw{
+  position:absolute;bottom:3%;z-index:14;
+  opacity:0;transition:opacity .35s;
+  display:flex;flex-direction:column;align-items:flex-start;
+}
+.qw img{
+  display:block;
+}
+
+/* wheel animation elements (hidden, used for JS wheel spin tracking) */
+.wheelL,.wheelR{
+  position:absolute;
+  bottom:6px;
+  width:20px;
+  height:20px;
+  opacity:0;
+  pointer-events:none;
+}
+.wheelL{left:18px}
+.wheelR{right:18px}
+.spinning{animation:wspin .10s linear infinite}
+@keyframes wspin{to{transform:rotate(360deg)}}
+
+/* ══ RABBIT CROSSING ══
+   Rabbits start grouped at sidewalk, cross down through zebra
+*/
+.rabbitgrp{
+  position:absolute;left:50%;top:58%;z-index:25;
+  width:120px;
+  transform:translateX(-50%);
+  pointer-events:none;
+  opacity:0;
+  transition:opacity 0.3s;
+}
+.rabbitgrp.visible{
+  opacity:1;
+}
+.rabbit-img{display:block;position:absolute;background:transparent;border:none;outline:none;left:0;top:0}
+
+/* Rabbits positioned horizontally across zebra - START grouped at sidewalk */
+#rb0{left:0px; transform:translateY(0)}
+#rb1{left:25px; transform:translateY(0)}
+#rb2{left:-15px; transform:translateY(0)}
+#rb3{left:35px; transform:translateY(0)}
+#rb4{left:10px; transform:translateY(0)}
+
+/* CSS Animation - all rabbits start grouped at sidewalk, then walk down */
+.rabbitgrp.crossing #rb0{animation:crossDown 5s linear infinite backwards; animation-delay:0s;}
+.rabbitgrp.crossing #rb1{animation:crossDown 5s linear infinite backwards; animation-delay:0.5s;}
+.rabbitgrp.crossing #rb2{animation:crossDown 5s linear infinite backwards; animation-delay:1s;}
+.rabbitgrp.crossing #rb3{animation:crossDown 5s linear infinite backwards; animation-delay:1.5s;}
+.rabbitgrp.crossing #rb4{animation:crossDown 5s linear infinite backwards; animation-delay:2s;}
+
+@keyframes crossDown{
+  0%{transform:translateY(-100px); opacity:0;}
+  10%{transform:translateY(0); opacity:1;}
+  80%{transform:translateY(300px); opacity:1;}
+  90%{transform:translateY(350px); opacity:0;}
+  100%{transform:translateY(350px); opacity:0;}
+}
+
+/* NIGHT MODE */
+.scene.night .sky{background:linear-gradient(180deg,#0a0a1a 0%,#1a1a3a 38%,#2a2a4a 58%,#1a2a1a 58%,#0a1a0a 72%)}
+.scene.night .sun{background:radial-gradient(circle,#e8e8e8,#c0c0c0);box-shadow:0 0 30px rgba(255,255,255,0.3)}
+.scene.night .sun .sr{background:rgba(200,200,200,0.3)}
+.scene.night .cl{background:rgba(255,255,255,0.15)}
+.scene.night .grass{background:linear-gradient(180deg,#1a3a1a 0%,#0a2a0a 100%)}
+.scene.night .sidewalk{background:linear-gradient(180deg,#4a4a5a,#3a3a4a)}
+.scene.night .road{background:linear-gradient(180deg,#2a2a3a 0%,#3a3a4a 50%,#2a2a3a 100%)}
+.scene.night .trees{filter:brightness(0.4)}
+.scene.night .bushes{filter:brightness(0.5)}
+
+/* Street lamp light bouncing onto trees - reflection effect */
+.trees::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 8% 90%,rgba(255,248,200,0.15) 0%,transparent 25%),radial-gradient(ellipse at 25% 85%,rgba(255,248,200,0.12) 0%,transparent 20%),radial-gradient(ellipse at 42% 88%,rgba(255,248,200,0.15) 0%,transparent 25%),radial-gradient(ellipse at 58% 85%,rgba(255,248,200,0.12) 0%,transparent 20%),radial-gradient(ellipse at 75% 90%,rgba(255,248,200,0.15) 0%,transparent 25%),radial-gradient(ellipse at 92% 88%,rgba(255,248,200,0.12) 0%,transparent 20%);pointer-events:none;animation:treeGlow 4s ease-in-out infinite;z-index:6}
+@keyframes treeGlow{0%,100%{opacity:0.5}50%{opacity:0.8}}
+
+/* stars for night mode */
+.stars{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity 1s}
+.scene.night .stars{opacity:1}
+.star{position:absolute;width:2px;height:2px;background:white;border-radius:50%;animation:twinkle 2s ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:0.3}50%{opacity:1}}
+.sakura-wrap{position:fixed;inset:0;pointer-events:none;z-index:300;overflow:hidden}
+.petal{position:absolute;top:-20px;pointer-events:none;animation:pfll linear infinite}
+@keyframes pfll{0%{opacity:.88;transform:translateY(0) rotate(0) translateX(0)}50%{transform:translateY(44vh) rotate(175deg) translateX(14px)}100%{opacity:0;transform:translateY(100vh) rotate(350deg) translateX(-12px)}}
+
+@media(max-width:800px){html,body{height:auto;overflow:auto}.main{grid-template-columns:1fr;height:auto;overflow:visible}.scene{height:300px}}
+</style>
+</head>
+<body>
+<div class="sakura-wrap" id="sakura"></div>
+
+<header>
+  <h1>🌸 lUMIN Traffic Control</h1>
+  <div class="conn-badge"><div class="dot" id="connDot"></div><span id="connLabel">Connecting…</span></div>
+</header>
+
+<div class="main">
+  <!-- ══ PANEL ══ -->
+  <div class="panel">
+    <div class="card">
+      <div class="ctitle">🚦 Traffic Light</div>
+      <div class="lc">
+        <div class="housing">
+          <div class="bulb rb on" id="bulb-red"></div>
+          <div class="bulb yb"    id="bulb-yellow"></div>
+          <div class="bulb gb"    id="bulb-green"></div>
+        </div>
+        <div id="llbl">🛑 RED — STOP</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ctitle">🎛️ Controls</div>
+      <div class="brow" style="margin-bottom:7px">
+        <button class="btn br" onclick="manualLight('red')">🔴 Red</button>
+        <button class="btn by" onclick="manualLight('yellow')">🟡 Yellow</button>
+        <button class="btn bg" onclick="manualLight('green')">🟢 Green</button>
+      </div>
+      <div class="brow">
+        <button class="btn ba" id="autoBtn"   onclick="toggleAuto()">🤖 Auto: OFF</button>
+        <button class="btn bt" id="enableBtn" onclick="toggleEnabled()">▶ Enable</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ctitle">⏱️ Phase Timer</div>
+      <div class="bwrap"><div class="bar" id="bar" style="width:100%"></div></div>
+      <div class="blbl" id="blbl">-- s</div>
+    </div>
+
+    <div class="card">
+      <div class="ctitle">📊 Stats</div>
+      <div class="sgrid">
+        <div class="sbox"><div class="sval" id="sCycles">0</div><div class="slbl">Cycles</div></div>
+        <div class="sbox"><div class="sval" id="sUptime">0s</div><div class="slbl">Uptime</div></div>
+        <div class="sbox"><div class="sval" id="sCar">🛑</div><div class="slbl">Cars</div></div>
+        <div class="sbox"><div class="sval" id="sDucks">�</div><div class="slbl">Rabbits</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ctitle">📡 ESP32 Status</div>
+      <div style="display:flex;align-items:center;gap:7px;font-size:.73rem;font-weight:700;color:rgba(255,255,255,.82)">
+        <div class="dot" id="espDot"></div><span id="espStatus">Waiting…</span>
+      </div>
+      <div style="margin-top:5px;font-size:.67rem;color:rgba(255,255,255,.5)" id="lastSeen">Last heartbeat: never</div>
+    </div>
+
+    <div class="card">
+      <div class="ctitle">📝 Log</div>
+      <div class="lw" id="logWrap"></div>
+    </div>
+  </div>
+
+  <!-- ══ SCENE ══ -->
+  <div class="scene" id="scene">
+    <!-- Sky -->
+    <div class="sky"></div>
+
+    <!-- Sun -->
+    <div class="sun">
+      <div class="sr" style="transform:rotate(0deg)"></div>
+      <div class="sr" style="transform:rotate(45deg)"></div>
+      <div class="sr" style="transform:rotate(90deg)"></div>
+      <div class="sr" style="transform:rotate(135deg)"></div>
+      <div class="sr" style="transform:rotate(180deg)"></div>
+      <div class="sr" style="transform:rotate(225deg)"></div>
+      <div class="sr" style="transform:rotate(270deg)"></div>
+      <div class="sr" style="transform:rotate(315deg)"></div>
+    </div>
+
+    <!-- Clouds -->
+    <div class="cl" style="width:95px;height:28px;top:16px;left:4%;animation-duration:28s;animation-delay:-5s"></div>
+    <div class="cl" style="width:68px;height:20px;top:38px;left:28%;animation-duration:36s;animation-delay:-13s"></div>
+    <div class="cl" style="width:115px;height:34px;top:12px;left:54%;animation-duration:21s;animation-delay:-2s"></div>
+
+    <!-- Butterflies -->
+    <div class="bf" style="top:14%;left:9%;--d:12s">🦋</div>
+    <div class="bf" style="top:24%;left:42%;--d:15s;animation-delay:-7s">🦋</div>
+
+    <!-- Stars (for night mode) -->
+    <div class="stars" id="stars"></div>
+
+    <!-- Trees behind bushes -->
+    <div class="trees" id="treeStrip"></div>
+
+    <!-- Bushes in front of trees -->
+    <div class="bushes" id="bushStrip"></div>
+
+    <!-- Grass strip (tulips built by JS) -->
+    <div class="grass" id="grassStrip"></div>
+
+    <!-- Sidewalk -->
+    <div class="sidewalk"></div>
+
+    <!-- RABBIT CROSSING - now outside road, at sidewalk level -->
+    <div class="rabbitgrp" id="rabbitGrp">
+      <img src="rabbit_crossing.png" alt="rabbit" width="65" height="65" id="rb0" class="rabbit-img">
+      <img src="rabbit_crossing1.png" alt="rabbit" width="60" height="60" id="rb1" class="rabbit-img">
+      <img src="rabbit_crossing2.png" alt="rabbit" width="62" height="62" id="rb2" class="rabbit-img">
+      <img src="rabbit_crossing3.png" alt="rabbit" width="58" height="58" id="rb3" class="rabbit-img">
+      <img src="rabbit_crossing4.png" alt="rabbit" width="68" height="68" id="rb4" class="rabbit-img">
+    </div>
+
+    <!-- Road with 4 lanes -->
+    <div class="road">
+      <div class="cdash l1" id="cdash1"></div>
+      <div class="cdash l2" id="cdash2"></div>
+      <div class="cdash l3" id="cdash3"></div>
+      <!-- zebra crossing -->
+      <div class="zebra"></div>
+    </div>
+
+    <!-- Signal pole — z8, BEHIND cars z15 -->
+    <div class="spole" id="spole">
+      <div class="phead">
+        <div class="mb mrb on" id="mini-red"></div>
+        <div class="mb myb"    id="mini-yellow"></div>
+        <div class="mb mgb"    id="mini-green"></div>
+      </div>
+      <div class="pstick" id="pstick" style="height:70px"></div>
+      <div class="pbase"></div>
+    </div>
+
+    <!-- Walk signal -->
+    <div class="wsig">
+      <div class="wbox" id="wbox">🚫</div>
+      <div class="pstick" style="height:46px"></div>
+      <div class="pbase"></div>
+    </div>
+
+    <!-- Street Lamps - light at top -->
+    <div class="streetlamp" style="left:8%;bottom:38%">
+      <div class="lamp-fixture">
+        <div class="lamp-light"></div>
+        <div class="lamp-head">
+          <div class="lamp-bulb"></div>
+        </div>
+      </div>
+      <div class="lamp-arm"></div>
+      <div class="lamp-post"></div>
+    </div>
+    <div class="streetlamp" style="left:25%;bottom:38%">
+      <div class="lamp-fixture">
+        <div class="lamp-light"></div>
+        <div class="lamp-head">
+          <div class="lamp-bulb"></div>
+        </div>
+      </div>
+      <div class="lamp-arm"></div>
+      <div class="lamp-post"></div>
+    </div>
+    <div class="streetlamp" style="left:42%;bottom:38%">
+      <div class="lamp-fixture">
+        <div class="lamp-light"></div>
+        <div class="lamp-head">
+          <div class="lamp-bulb"></div>
+        </div>
+      </div>
+      <div class="lamp-arm"></div>
+      <div class="lamp-post"></div>
+    </div>
+    <div class="streetlamp" style="left:58%;bottom:38%">
+      <div class="lamp-fixture">
+        <div class="lamp-light"></div>
+        <div class="lamp-head">
+          <div class="lamp-bulb"></div>
+        </div>
+      </div>
+      <div class="lamp-arm"></div>
+      <div class="lamp-post"></div>
+    </div>
+    <div class="streetlamp" style="left:75%;bottom:38%">
+      <div class="lamp-fixture">
+        <div class="lamp-light"></div>
+        <div class="lamp-head">
+          <div class="lamp-bulb"></div>
+        </div>
+      </div>
+      <div class="lamp-arm"></div>
+      <div class="lamp-post"></div>
+    </div>
+    <div class="streetlamp" style="left:92%;bottom:38%">
+      <div class="lamp-fixture">
+        <div class="lamp-light"></div>
+        <div class="lamp-head">
+          <div class="lamp-bulb"></div>
+        </div>
+      </div>
+      <div class="lamp-arm"></div>
+      <div class="lamp-post"></div>
+    </div>
+
+    <!-- ── LANE 1: right-going cars (outer right) - LEFT TO RIGHT ── -->
+    <div class="car1w halt" id="c0" style="left:-165px">
+      <img src="car6.png" alt="car" width="108" height="60">
+      <div class="wheelL" id="wc0L"></div>
+      <div class="wheelR" id="wc0R"></div>
+    </div>
+    <div class="car1w halt" id="c0b" style="left:-550px">
+      <img src="car7.png" alt="car" width="108" height="60">
+      <div class="wheelL" id="wc0bL"></div>
+      <div class="wheelR" id="wc0bR"></div>
+    </div>
+    <div class="car1w halt" id="c0c" style="left:-820px">
+      <img src="car9.png" alt="car" width="108" height="60">
+      <div class="wheelL" id="wc0cL"></div>
+      <div class="wheelR" id="wc0cR"></div>
+    </div>
+
+    <!-- ── LANE 2: left-going cars (inner right) - RIGHT TO LEFT -->
+    <div class="car2w drive" id="c2" style="right:-165px">
+      <img src="car5.png" alt="car" width="108" height="60">
+      <div class="wheelL" id="w2L"></div>
+      <div class="wheelR" id="w2R"></div>
+    </div>
+    <div class="car2w drive" id="c2b" style="right:-430px">
+      <img src="car8.png" alt="car" width="108" height="60">
+      <div class="wheelL" id="w2bL"></div>
+      <div class="wheelR" id="w2bR"></div>
+    </div>
+    <div class="car2w drive" id="c2c" style="right:-700px">
+      <img src="car11.png" alt="car" width="108" height="60">
+      <div class="wheelL" id="w2cL"></div>
+      <div class="wheelR" id="w2cR"></div>
+    </div>
+
+    <!-- ── LANE 3: right-going cars (inner left) - LEFT TO RIGHT -->
+    <div class="car3w drive" id="c3" style="left:-165px">
+      <img src="car10.png" alt="car" width="108" height="60">
+      <div class="wheelL" id="w3L"></div>
+      <div class="wheelR" id="w3R"></div>
+    </div>
+    <div class="car3w drive" id="c3b" style="left:-430px">
+      <img src="car6.png" alt="car" width="108" height="60">
+      <div class="wheelL" id="w3bL"></div>
+      <div class="wheelR" id="w3bR"></div>
+    </div>
+    <div class="car3w drive" id="c3c" style="left:-700px">
+      <img src="car7.png" alt="car" width="108" height="60">
+      <div class="wheelL" id="w3cL"></div>
+      <div class="wheelR" id="w3cR"></div>
+    </div>
+
+    <!-- ── LANE 4: left-going cars (outer left) - RIGHT TO LEFT -->
+    <div class="car4w drive" id="c4" style="right:-165px">
+      <img src="car5.png" alt="car" width="108" height="60">
+      <div class="wheelL" id="w4L"></div>
+      <div class="wheelR" id="w4R"></div>
+    </div>
+    <div class="car4w drive" id="c4b" style="right:-430px">
+      <img src="car8.png" alt="car" width="108" height="60">
+      <div class="wheelL" id="w4bL"></div>
+      <div class="wheelR" id="w4bR"></div>
+    </div>
+    <div class="car4w drive" id="c4c" style="right:-700px">
+      <img src="car12.png" alt="car" width="108" height="60" style="transform:scaleX(-1)">
+      <div class="wheelL" id="w4cL"></div>
+      <div class="wheelR" id="w4cR"></div>
+    </div>
+
+    <!-- Walk signal -->
+    <div class="wsig">
+      <div class="wbox" id="wbox">🚫</div>
+      <div class="pstick" style="height:46px"></div>
+      <div class="pbase"></div>
+    </div>
+
+    <!-- Street Lamps - light at top -->
+    <div class="streetlamp" style="left:8%;bottom:38%">
+      <div class="lamp-fixture">
+        <div class="lamp-light"></div>
+        <div class="lamp-head">
+          <div class="lamp-bulb"></div>
+        </div>
+      </div>
+      <div class="lamp-arm"></div>
+      <div class="lamp-post"></div>
+    </div>
+    <div class="streetlamp" style="left:25%;bottom:38%">
+      <div class="lamp-fixture">
+        <div class="lamp-light"></div>
+        <div class="lamp-head">
+          <div class="lamp-bulb"></div>
+        </div>
+      </div>
+      <div class="lamp-arm"></div>
+      <div class="lamp-post"></div>
+    </div>
+    <div class="streetlamp" style="left:42%;bottom:38%">
+      <div class="lamp-fixture">
+        <div class="lamp-light"></div>
+        <div class="lamp-head">
+          <div class="lamp-bulb"></div>
+        </div>
+      </div>
+      <div class="lamp-arm"></div>
+      <div class="lamp-post"></div>
+    </div>
+    <div class="streetlamp" style="left:58%;bottom:38%">
+      <div class="lamp-fixture">
+        <div class="lamp-light"></div>
+        <div class="lamp-head">
+          <div class="lamp-bulb"></div>
+        </div>
+      </div>
+      <div class="lamp-arm"></div>
+      <div class="lamp-post"></div>
+    </div>
+    <div class="streetlamp" style="left:75%;bottom:38%">
+      <div class="lamp-fixture">
+        <div class="lamp-light"></div>
+        <div class="lamp-head">
+          <div class="lamp-bulb"></div>
+        </div>
+      </div>
+      <div class="lamp-arm"></div>
+      <div class="lamp-post"></div>
+    </div>
+    <div class="streetlamp" style="left:92%;bottom:38%">
+      <div class="lamp-fixture">
+        <div class="lamp-light"></div>
+        <div class="lamp-head">
+          <div class="lamp-bulb"></div>
+        </div>
+      </div>
+      <div class="lamp-arm"></div>
+      <div class="lamp-post"></div>
+    </div>
+
+  </div><!-- /scene -->
+</div><!-- /main -->
+
+<script>
+// ═══════════════════════════════════════════
+//  MYSQL API CONFIG
+// ═══════════════════════════════════════════
+const API_BASE = 'http://10.26.133.184/Bunny_Trafficlight/api.php'; // UPDATE THIS!
+
+// ═══════════════════════════════════════════
+//  CONSTANTS (match ESP32 firmware)
+// ═══════════════════════════════════════════
+const DUR   = {red:30,yellow:5,green:25,off:0};
+const LNAME = {red:'🛑 RED — STOP',yellow:'💛 YELLOW — CAUTION',green:'💚 GREEN — GO!',off:'⚫ OFF'};
+
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let state     = {enabled:false,mode:'auto',manual_light:'red',current_light:'red',remaining:0};
+let cycles    = 0, startTime = Date.now(), localTimer = null;
+let lastSeen  = 0;
+
+// ═══════════════════════════════════════════
+//  API CALLS
+// ═══════════════════════════════════════════
+async function apiGet(action){
+  try{
+    const url = `${API_BASE}?action=${action}`;
+    const r=await fetch(url);
+    if(!r.ok) throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+    const j=await r.json();
+    return j.success?j.data:null;
+  }catch(e){return null;}
+}
+async function apiPost(action,body){
+  try{
+    const url = `${API_BASE}?action=${action}`;
+    const r=await fetch(url,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(body)
+    });
+    if(!r.ok) throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+    const j=await r.json();
+    return j.success;
+  }catch(e){return false;}
+}
+
+// ═══════════════════════════════════════════
+//  MYSQL WRITE FUNCTIONS
+//  wCfg now ALSO updates local state immediately so the UI
+//  never reverts while waiting for the next poll.
+// ═══════════════════════════════════════════
+let _dashboardPendingUntil = 0; // suppress poll-overwrites for 3 s after a dashboard write
+
+async function wCfg(p) {
+  // 1. Merge into local state right now
+  if ('enabled'       in p) state.enabled       = !!p.enabled;
+  if ('mode'          in p) state.mode          = p.mode;
+  if ('manual_light'  in p) state.manual_light  = p.manual_light;
+  if ('current_light' in p) state.current_light = p.current_light;
+  if ('remaining_time'in p) state.remaining     = p.remaining_time;
+
+  // 2. Refresh UI from the updated local state immediately
+  applyLightUI(state.current_light);
+  applyTimerUI(state.current_light, state.remaining);
+  applyCtrlUI();
+  applyScene(state.current_light, state.enabled);
+  startCountdown(state.current_light, state.remaining);
+
+  // 3. Tell poll to hold off overwriting for 5 seconds (was 3, increased for reliability)
+  _dashboardPendingUntil = Date.now() + 5000;
+
+  // 4. Persist to DB
+  return apiPost('update', {...p, updated_by:'dashboard'});
+}
+const wLog = (l,m,s) => apiPost('log',{light:l,mode:m,source:s});
+
+// ═══════════════════════════════════════════
+//  POLLING LOOP (replaces Firebase listeners)
+// ═══════════════════════════════════════════
+async function pollData(){
+  const cfg=await apiGet('config');
+  const status=await apiGet('status');
+  
+  // Update connection status
+  const now=Date.now();
+  const ok=!!(cfg&&status);
+  document.getElementById('connDot').classList.toggle('ok',ok);
+  document.getElementById('connLabel').textContent=ok?'🌸 MySQL Live':'⏳ Reconnecting…';
+  
+  // Update ESP32 status
+  if(status){
+    const online=(now-status.last_seen)<30000;
+    document.getElementById('espDot').classList.toggle('ok',online);
+    document.getElementById('espStatus').textContent=online?'✅ ESP32 Online':'❌ ESP32 Offline';
+    if(status.last_seen) document.getElementById('lastSeen').textContent='Last heartbeat: '+new Date(status.last_seen).toLocaleTimeString();
+  }
+  
+  // Process config changes — but SKIP if we just sent a dashboard command
+  // (give the DB write time to settle before we read it back)
+  if(cfg && now >= _dashboardPendingUntil){
+    const prev={...state};
+    state.enabled       = !!cfg.enabled;
+    // IMPORTANT: Mode is controlled by dashboard only, not server/ESP32
+    // Server may not return mode, so we preserve local state
+    // state.mode is NOT updated from server - prevents auto->manual switch bug
+    if(cfg.mode && (cfg.mode==='auto' || cfg.mode==='manual')){
+      state.mode = cfg.mode; // Only accept valid mode from server
+    }
+    state.manual_light  = cfg.manual_light || state.manual_light;
+    state.current_light = cfg.current_light ||'off';
+    state.remaining     = cfg.remaining_time??0;
+    applyLightUI(state.current_light);
+    applyTimerUI(state.current_light,state.remaining);
+    applyCtrlUI();
+    applyScene(state.current_light,state.enabled);
+    if(prev.current_light!==state.current_light){
+      log(`Light → ${state.current_light.toUpperCase()} [${state.mode}]`);
+      if(state.current_light==='red'&&prev.current_light!==''){cycles++;document.getElementById('sCycles').textContent=cycles;}
+      // Restart countdown with server's remaining time for new light
+      startCountdown(state.current_light,state.remaining);
+    } else {
+      // Same light - just sync local variable to server time (don't update UI)
+      // Local timer handles smooth UI updates every second
+      localRemaining = state.remaining;
+      localLight = state.current_light;
+    }
+  }
+}
+
+// Poll every second
+setInterval(pollData,1000);
+pollData(); // Initial fetch
+
+// ═══════════════════════════════════════════
+//  LOCAL COUNTDOWN - smooth with server sync
+// ═══════════════════════════════════════════
+let localRemaining = 0;
+let localLight = 'off';
+
+function startCountdown(light,secs){
+  // Start local countdown that ticks every second
+  clearInterval(localTimer);
+  if(!state.enabled||light==='off') return;
+  
+  localLight = light;
+  localRemaining = secs;
+  
+  localTimer = setInterval(()=>{
+    if(localRemaining > 0) {
+      localRemaining--;
+      applyTimerUI(localLight, localRemaining);
+    }
+  }, 1000);
+}
+
+// ═══════════════════════════════════════════
+//  UI UPDATES
+// ═══════════════════════════════════════════
+function applyLightUI(l){
+  ['red','yellow','green'].forEach(c=>{
+    document.getElementById('bulb-'+c).classList.toggle('on',c===l);
+    document.getElementById('mini-'+c).classList.toggle('on',c===l);
+  });
+  document.getElementById('llbl').textContent=LNAME[l]||'';
+}
+function applyTimerUI(l,s){
+  const m=DUR[l]||1;
+  document.getElementById('bar').style.width=Math.min(100,Math.max(0,s/m*100))+'%';
+  document.getElementById('blbl').textContent=state.enabled&&l!=='off'?s+'s remaining':'--';
+}
+function applyCtrlUI(){
+  document.getElementById('autoBtn').textContent='🤖 Auto: '+(state.mode==='auto'?'ON':'OFF');
+  document.getElementById('enableBtn').textContent=state.enabled?'⏹ Disable':'▶ Enable';
+}
+
+// ═══════════════════════════════════════════
+//  CAR ANIMATION SYSTEM
+//  Tracks cycle count, starting position, and smooth stop/yellow behavior
+// ═══════════════════════════════════════════
+const ALL_CARS = ['c0','c0b','c0c','c2','c2b','c2c','c3','c3b','c3c','c4','c4b','c4c'];
+
+let carCycles = {c0:0,c0b:0,c0c:0,c2:0,c2b:0,c2c:0,c3:0,c3b:0,c3c:0,c4:0,c4b:0,c4c:0};
+let carStates = {c0:'stopped',c0b:'stopped',c0c:'stopped',c2:'stopped',c2b:'stopped',c2c:'stopped',c3:'stopped',c3b:'stopped',c3c:'stopped',c4:'stopped',c4b:'stopped',c4c:'stopped'};
+let carPositions = {c0:0,c0b:0,c0c:0,c2:0,c2b:0,c2c:0,c3:0,c3b:0,c3c:0,c4:0,c4b:0,c4c:0};
+let carSpeeds = {c0:0,c0b:0,c0c:0,c2:0,c2b:0,c2c:0,c3:0,c3b:0,c3c:0,c4:0,c4b:0,c4c:0};
+let carRAF = null;
+
+// Car config: each lane's settings - startOff matches CSS initial positions
+// stopPos will be calculated dynamically based on car order in lane
+const CAR_CFG = {
+  c0: {lane:1, dir:'right', startOff:-165, stopPos:null, speed:180, slowSpeed:90, img:'car6.png', order:0},
+  c0b: {lane:1, dir:'right', startOff:-550, stopPos:null, speed:175, slowSpeed:88, img:'car7.png', order:1},
+  c0c: {lane:1, dir:'right', startOff:-820, stopPos:null, speed:185, slowSpeed:92, img:'car9.png', order:2},
+  c2: {lane:2, dir:'left', startOff:-165, stopPos:null, speed:160, slowSpeed:80, img:'car5.png', order:0},
+  c2b: {lane:2, dir:'left', startOff:-430, stopPos:null, speed:165, slowSpeed:82, img:'car8.png', order:1},
+  c2c: {lane:2, dir:'left', startOff:-700, stopPos:null, speed:155, slowSpeed:78, img:'car11.png', order:2},
+  c3: {lane:3, dir:'right', startOff:-165, stopPos:null, speed:170, slowSpeed:85, img:'car10.png', order:0},
+  c3b: {lane:3, dir:'right', startOff:-430, stopPos:null, speed:175, slowSpeed:87, img:'car6.png', order:1},
+  c3c: {lane:3, dir:'right', startOff:-700, stopPos:null, speed:165, slowSpeed:83, img:'car7.png', order:2},
+  c4: {lane:4, dir:'left', startOff:-165, stopPos:null, speed:150, slowSpeed:75, img:'car5.png', order:0},
+  c4b: {lane:4, dir:'left', startOff:-430, stopPos:null, speed:155, slowSpeed:77, img:'car8.png', order:1},
+  c4c: {lane:4, dir:'left', startOff:-700, stopPos:null, speed:145, slowSpeed:73, img:'car12.png', order:2}
+};
+
+function initCarPositions(){
+  const sl = stopLeft();
+  const sr = stopRight();
+  const W = $('scene').offsetWidth;
+  const CAR_SPACING = 130; // Space between cars in queue
+  
+  // Set stop positions (before zebra) - right-going use sl, left-going use sr
+  // Each car in lane stops behind the previous one
+  ALL_CARS.forEach(id => {
+    const cfg = CAR_CFG[id];
+    const baseStop = cfg.dir === 'right' ? sl : sr;
+    // First car (order 0) stops at base, others stop behind
+    cfg.stopPos = baseStop - (cfg.order * CAR_SPACING);
+    cfg.zebraPos = cfg.dir === 'right' ? sl + 150 : sr + 150;
+    cfg.offScreen = cfg.startOff;
+    cfg.endScreen = W + 165;
+  });
+}
+
+function startCarAnim(carId){
+  const cfg = CAR_CFG[carId];
+  const el = $(carId);
+  if(!el) return;
+  
+  // Cars always start/wait at the stop line (before pedestrian crossing)
+  // They only move forward when green is active
+  if(carStates[carId] === 'stopped'){
+    // Already stopped at line - ready to go on green
+    carPositions[carId] = cfg.stopPos;
+  } else if(carPositions[carId] <= 0){
+    // First time - position at stop line
+    carPositions[carId] = cfg.stopPos;
+    carStates[carId] = 'stopped';
+  }
+  
+  // Set initial position
+  updateCarPosition(carId);
+  
+  // Only start driving if light is green
+  if(state.current_light === 'green' && state.enabled){
+    carStates[carId] = 'driving';
+    carSpeeds[carId] = cfg.speed;
+    
+    // Start wheels - handle different wheel ID patterns
+    const wheelIdBase = carId.startsWith('c0') ? 'w' + carId : carId.replace(/^c/, 'w');
+    const wL = $(wheelIdBase + 'L');
+    const wR = $(wheelIdBase + 'R');
+    if(wL) wL.classList.add('spinning');
+    if(wR) wR.classList.add('spinning');
+    
+    if(!carRAF) carRAFLoop();
+  }
+}
+
+function slowCar(carId){
+  const cfg = CAR_CFG[carId];
+  carSpeeds[carId] = cfg.slowSpeed;
+  carStates[carId] = 'slowing';
+}
+
+function stopCar(carId){
+  const cfg = CAR_CFG[carId];
+  carSpeeds[carId] = 0;
+  carStates[carId] = 'stopped';
+  // Snap to stop position
+  carPositions[carId] = cfg.stopPos;
+  updateCarPosition(carId);
+  
+  // Stop wheels - handle different wheel ID patterns
+  const wheelIdBase = carId.startsWith('c0') ? 'w' + carId : carId.replace(/^c/, 'w');
+  const wL = $(wheelIdBase + 'L');
+  const wR = $(wheelIdBase + 'R');
+  if(wL) wL.classList.remove('spinning');
+  if(wR) wR.classList.remove('spinning');
+}
+
+function updateCarPosition(carId){
+  const el = $(carId);
+  if(!el) return;
+  const cfg = CAR_CFG[carId];
+  if(cfg.dir === 'right'){
+    el.style.left = carPositions[carId] + 'px';
+  } else {
+    el.style.right = carPositions[carId] + 'px';
+  }
+}
+
+function carRAFLoop(){
+  if(!state.enabled || state.current_light === 'off'){
+    carRAF = null;
+    return;
+  }
+  
+  const dt = 1/60; // Assume 60fps
+  const W = $('scene').offsetWidth;
+  
+  ALL_CARS.forEach(carId => {
+    const cfg = CAR_CFG[carId];
+    const pos = carPositions[carId];
+    
+    if(carStates[carId] === 'driving' || carStates[carId] === 'slowing'){
+      // Move car
+      carPositions[carId] += carSpeeds[carId] * dt;
+      
+      // Check for red light - stop at stop line
+      if(state.current_light === 'red' && pos >= cfg.stopPos && pos < cfg.stopPos + 65){
+        carPositions[carId] = cfg.stopPos;
+        carStates[carId] = 'stopped';
+        carSpeeds[carId] = 0;
+        updateCarPosition(carId);
+        const wheelIdBase = carId.startsWith('c0') ? 'w' + carId : carId.replace(/^c/, 'w');
+        const wL = $(wheelIdBase + 'L');
+        const wR = $(wheelIdBase + 'R');
+        if(wL) wL.classList.remove('spinning');
+        if(wR) wR.classList.remove('spinning');
+        return;
+      }
+      
+      // Check if passed end of screen
+      if(pos > W + 200){
+        // Car left screen - hide it (exit)
+        carPositions[carId] = cfg.startOff;
+        carStates[carId] = 'exited';
+        carSpeeds[carId] = 0;
+        
+        // Stop wheels
+        const wheelIdBase = carId.startsWith('c0') ? 'w' + carId : carId.replace(/^c/, 'w');
+        const wL = $(wheelIdBase + 'L');
+        const wR = $(wheelIdBase + 'R');
+        if(wL) wL.classList.remove('spinning');
+        if(wR) wR.classList.remove('spinning');
+      }
+      
+      updateCarPosition(carId);
+    }
+  });
+  
+  carRAF = requestAnimationFrame(carRAFLoop);
+}
+
+// ═══════════════════════════════════════════
+//  SCENE — element refs (cached after DOM ready)
+// ═══════════════════════════════════════════
+const $ = id => document.getElementById(id);
+
+// Car stop-line calculations
+// Zebra crossing is centered at 50% with width 120px
+// Right-going cars stop before zebra left edge
+// Left-going cars stop before zebra right edge
+function stopLeft(){
+  const W = $('scene').offsetWidth;
+  const zebraCenter = W / 2;
+  const zebraLeft = zebraCenter - 60; // half of 120px width
+  // Stop car (108px wide) with 20px gap before zebra
+  return zebraLeft - 108 - 20;
+}
+function stopRight(){
+  const W = $('scene').offsetWidth;
+  const zebraCenter = W / 2;
+  const zebraRight = zebraCenter + 60; // half of 120px width
+  // Stop car (108px wide) with 20px gap before zebra (from right side)
+  return W - zebraRight - 108 - 20;
+}
+
+function allWheels(spin){
+  ALL_CARS.forEach(id => {
+    // Handle different wheel ID patterns
+    const wheelIdBase = id.startsWith('c0') ? 'w' + id : id.replace(/^c/, 'w');
+    const wL = $(wheelIdBase + 'L'), wR = $(wheelIdBase + 'R');
+    if(wL) wL.classList.toggle('spinning',spin);
+    if(wR) wR.classList.toggle('spinning',spin);
+  });
+}
+
+function applyScene(light,enabled){
+  const dash1 = $('cdash1'), dash2 = $('cdash2'), dash3 = $('cdash3');
+  const wbox  = $('wbox');
+  const c0    = $('c0'), c2 = $('c2'), c3 = $('c3'), c4 = $('c4');
+  const sl    = stopLeft();
+  const sr    = stopRight();
+
+  // Init car positions on first call
+  if(CAR_CFG.c0.stopPos === null){
+    initCarPositions();
+    // Cars start at their CSS positions (startOff), not at stop line
+    // This prevents the jump on initial load
+    ALL_CARS.forEach(id=>{
+      carPositions[id] = CAR_CFG[id].startOff;
+      // Sync the DOM element to match CSS initial position
+      const el = $(id);
+      if(el){
+        const cfg = CAR_CFG[id];
+        if(cfg.dir === 'right'){
+          el.style.left = cfg.startOff + 'px';
+        } else {
+          el.style.right = cfg.startOff + 'px';
+        }
+      }
+    });
+  }
+
+  if(!enabled||light==='off'){
+    // When OFF, just reset states without moving cars to stop line
+    ALL_CARS.forEach(id=>{
+      carSpeeds[id] = 0;
+      carStates[id] = 'stopped';
+      // Keep cars at their CSS initial positions
+      carPositions[id] = CAR_CFG[id].startOff;
+      const el = $(id);
+      if(el){
+        const cfg = CAR_CFG[id];
+        if(cfg.dir === 'right'){
+          el.style.left = cfg.startOff + 'px';
+        } else {
+          el.style.right = cfg.startOff + 'px';
+        }
+      }
+      // Stop wheels
+      const wheelIdBase = id.startsWith('c0') ? 'w' + id : id.replace(/^c/, 'w');
+      const wL = $(wheelIdBase + 'L');
+      const wR = $(wheelIdBase + 'R');
+      if(wL) wL.classList.remove('spinning');
+      if(wR) wR.classList.remove('spinning');
+    });
+    pauseAllDashes(); wbox.textContent='🚫';
+    rabbitHide();
+    $('sCar').textContent='⚫'; $('sDucks').textContent='💤';
+    cancelAnimationFrame(carRAF); carRAF=null;
+    return;
+  }
+
+  if(light==='green'){
+    ALL_CARS.forEach(id=>{
+      const cfg = CAR_CFG[id];
+      // On green: ALL cars should drive
+      if(carStates[id] === 'exited'){
+        // Car was off-screen - reset to start position and drive
+        carStates[id] = 'driving';
+        carSpeeds[id] = cfg.speed;
+        carPositions[id] = cfg.startOff;
+        const wheelIdBase = id.startsWith('c0') ? 'w' + id : id.replace(/^c/, 'w');
+        const wL = $(wheelIdBase + 'L');
+        const wR = $(wheelIdBase + 'R');
+        if(wL) wL.classList.add('spinning');
+        if(wR) wR.classList.add('spinning');
+      } else if(carStates[id] === 'stopped' || carSpeeds[id] === 0){
+        // Car was stopped at line - start driving from current position
+        carStates[id] = 'driving';
+        carSpeeds[id] = cfg.speed;
+        // Don't reset position - continue from where car is (at stop line)
+        const wheelIdBase = id.startsWith('c0') ? 'w' + id : id.replace(/^c/, 'w');
+        const wL = $(wheelIdBase + 'L');
+        const wR = $(wheelIdBase + 'R');
+        if(wL) wL.classList.add('spinning');
+        if(wR) wR.classList.add('spinning');
+      } else if(carStates[id] === 'driving' || carStates[id] === 'slowing'){
+        // Already driving - just ensure speed is correct
+        carSpeeds[id] = cfg.speed;
+        const wheelIdBase = id.startsWith('c0') ? 'w' + id : id.replace(/^c/, 'w');
+        const wL = $(wheelIdBase + 'L');
+        const wR = $(wheelIdBase + 'R');
+        if(wL) wL.classList.add('spinning');
+        if(wR) wR.classList.add('spinning');
+      }
+    });
+    if(!carRAF) carRAF = requestAnimationFrame(carRAFLoop);
+    resumeAllDashes(); wbox.textContent='🚫';
+    // Green light - cars go, bunnies hide
+    rabbitHide();
+    $('sCar').textContent='🚗'; $('sDucks').textContent='⏸️';
+
+  } else if(light==='red'){
+    // RED LIGHT: Cars are queued at stop line, waiting for green
+    // On first run or when enabled, position cars at stop line immediately
+    ALL_CARS.forEach(id=>{
+      const cfg = CAR_CFG[id];
+      const pos = carPositions[id];
+      
+      // If car is off-screen or not yet positioned, place it at stop line
+      if(carStates[id] === 'exited' || pos <= cfg.startOff + 10 || pos < cfg.stopPos){
+        // Place car at stop line (queued up, ready to go)
+        carStates[id] = 'stopped';
+        carSpeeds[id] = 0;
+        carPositions[id] = cfg.stopPos - (cfg.order * 130); // Queue behind previous car
+        updateCarPosition(id);
+        const wheelIdBase = id.startsWith('c0') ? 'w' + id : id.replace(/^c/, 'w');
+        const wL = $(wheelIdBase + 'L');
+        const wR = $(wheelIdBase + 'R');
+        if(wL) wL.classList.remove('spinning');
+        if(wR) wR.classList.remove('spinning');
+      } else if(pos >= cfg.stopPos && pos <= cfg.stopPos + 65){
+        // Car is at stop line - stop and wait
+        carStates[id] = 'stopped';
+        carSpeeds[id] = 0;
+        carPositions[id] = cfg.stopPos;
+        updateCarPosition(id);
+        const wheelIdBase = id.startsWith('c0') ? 'w' + id : id.replace(/^c/, 'w');
+        const wL = $(wheelIdBase + 'L');
+        const wR = $(wheelIdBase + 'R');
+        if(wL) wL.classList.remove('spinning');
+        if(wR) wR.classList.remove('spinning');
+      } else if(pos > cfg.stopPos + 65){
+        // Car already passed pedestrian lane - let it exit
+        carStates[id] = 'driving';
+        carSpeeds[id] = cfg.speed;
+        const wheelIdBase = id.startsWith('c0') ? 'w' + id : id.replace(/^c/, 'w');
+        const wL = $(wheelIdBase + 'L');
+        const wR = $(wheelIdBase + 'R');
+        if(wL) wL.classList.add('spinning');
+        if(wR) wR.classList.add('spinning');
+      }
+      // If car is driving toward stop line, let it continue
+    });
+    if(!carRAF) carRAF = requestAnimationFrame(carRAFLoop);
+    pauseAllDashes(); wbox.textContent='🚶';
+    rabbitWalk(state.remaining);
+    $('sCar').textContent='🛑'; $('sDucks').textContent='🐰';
+
+  } else { // YELLOW/ORANGE LIGHT
+    // Cars that crossed pedestrian lane continue and exit
+    // Cars that haven't crossed stop at the line
+    // Cars that are exited stay off-screen
+    ALL_CARS.forEach(id=>{
+      const cfg = CAR_CFG[id];
+      const pos = carPositions[id];
+      const distPastStop = pos - cfg.stopPos;
+      
+      // Keep exited cars off-screen
+      if(carStates[id] === 'exited'){
+        // Do nothing - car stays off-screen
+        return;
+      }
+      
+      // Keep off-screen cars off-screen (don't place at stop line during yellow)
+      if(pos <= cfg.startOff + 10){
+        // Car is still off-screen - keep it there
+        carStates[id] = 'exited';
+        carSpeeds[id] = 0;
+        return;
+      }
+      
+      if(distPastStop > 65){
+        // Past the pedestrian crossing - continue to exit
+        carStates[id] = 'driving';
+        carSpeeds[id] = cfg.speed;
+        const wheelIdBase = id.startsWith('c0') ? 'w' + id : id.replace(/^c/, 'w');
+        const wL = $(wheelIdBase + 'L');
+        const wR = $(wheelIdBase + 'R');
+        if(wL) wL.classList.add('spinning');
+        if(wR) wR.classList.add('spinning');
+      } else {
+        // Before pedestrian crossing - move car off-screen (don't show at stop line during yellow)
+        carStates[id] = 'exited';
+        carSpeeds[id] = 0;
+        carPositions[id] = cfg.startOff;
+        updateCarPosition(id);
+        const wheelIdBase = id.startsWith('c0') ? 'w' + id : id.replace(/^c/, 'w');
+        const wL = $(wheelIdBase + 'L');
+        const wR = $(wheelIdBase + 'R');
+        if(wL) wL.classList.remove('spinning');
+        if(wR) wR.classList.remove('spinning');
+      }
+    });
+    if(!carRAF) carRAF = requestAnimationFrame(carRAFLoop);
+    pauseAllDashes(); wbox.textContent='⚠️';
+    rabbitFreeze();
+    $('sCar').textContent='🐌'; $('sDucks').textContent='⚠️';
+  }
+}
+
+function pauseAllDashes(){
+  const dash1 = $('cdash1'), dash2 = $('cdash2'), dash3 = $('cdash3');
+  if(dash1) dash1.classList.add('paused');
+  if(dash2) dash2.classList.add('paused');
+  if(dash3) dash3.classList.add('paused');
+}
+function resumeAllDashes(){
+  const dash1 = $('cdash1'), dash2 = $('cdash2'), dash3 = $('cdash3');
+  if(dash1) dash1.classList.remove('paused');
+  if(dash2) dash2.classList.remove('paused');
+  if(dash3) dash3.classList.remove('paused');
+}
+
+// ═══════════════════════════════════════════
+//  RABBIT CROSSING - CSS Animation only
+// ═══════════════════════════════════════════
+
+function rabbitWalk(remainingTime){
+  const grp = $('rabbitGrp');
+  if(!grp) return;
+  
+  // Show rabbits and start CSS animation
+  grp.classList.add('visible');
+  grp.classList.add('crossing');
+}
+
+function rabbitHide(){
+  const grp=$('rabbitGrp');
+  if(grp) {
+    grp.classList.remove('visible');
+    grp.classList.remove('crossing');
+  }
+}
+
+// ═══════════════════════════════════════════
+//  USER ACTIONS
+// ═══════════════════════════════════════════
+function toggleEnabled(){
+  const n=!state.enabled;
+  const p={enabled:n};
+  // Always preserve mode and manual_light
+  p.mode = state.mode;
+  p.manual_light = state.manual_light;
+  if(n){
+    // Turning ON — use current mode to pick starting light
+    if(state.mode==='manual'){
+      p.current_light = state.manual_light;
+    } else {
+      // AUTO mode: start with red so ESP32 can take over auto cycle
+      p.current_light = 'red';
+    }
+    p.remaining_time = DUR[p.current_light];
+  } else {
+    p.current_light='off';
+    p.remaining_time=0;
+  }
+  wCfg(p);
+  wLog(p.current_light, state.mode, 'dashboard');
+  log(n ? 'System ENABLED' : 'System DISABLED');
+}
+function toggleAuto(){
+  const m = state.mode==='auto' ? 'manual' : 'auto';
+  const p = {mode:m};
+  // Set current_light and remaining_time for both modes
+  if(m==='manual'){
+    p.current_light = state.manual_light;
+    p.remaining_time = DUR[state.manual_light];
+  } else {
+    // AUTO mode: start with red
+    p.current_light = 'red';
+    p.remaining_time = DUR.red;
+  }
+  // Always include manual_light to preserve it
+  p.manual_light = state.manual_light;
+  // If system is off, enabling auto should also enable the system
+  if(!state.enabled) p.enabled = true;
+  wCfg(p);
+  // Force immediate UI update
+  applyCtrlUI();
+  wLog(p.current_light, m, 'dashboard');
+  log('Mode → '+m.toUpperCase());
+}
+function manualLight(c){
+  // Allow manual light selection even when disabled — it will enable the system too
+  const p = {mode:'manual', manual_light:c, current_light:c, remaining_time:DUR[c], enabled:true};
+  wCfg(p);
+  wLog(c, 'manual', 'dashboard');
+  log('Manual → '+c.toUpperCase());
+}
+
+// ═══════════════════════════════════════════
+//  LOG
+// ═══════════════════════════════════════════
+function log(msg){
+  const w=$('logWrap');
+  const e=document.createElement('div'); e.className='le';
+  e.textContent=new Date().toLocaleTimeString()+' — '+msg;
+  w.prepend(e); if(w.children.length>40) w.lastChild.remove();
+}
+setInterval(()=>{
+  const s=Math.floor((Date.now()-startTime)/1000);
+  $('sUptime').textContent=s<60?s+'s':Math.floor(s/60)+'m '+(s%60)+'s';
+},1000);
+
+// ═══════════════════════════════════════════
+//  SCENE BUILDER — grass, bushes, tulips, trees, stars
+// ═══════════════════════════════════════════
+(function buildScene(){
+  const strip=$('grassStrip');
+  const treeStrip=$('treeStrip');
+  const bushStrip=$('bushStrip');
+  const starsContainer=$('stars');
+  const FW=['🌸','🌷','🌼','💮','🌺','🌻'];
+  const COLORS=[['#f5c6d8','#b87a9a'],['#d4a8cc','#7a3055'],['#ffd6e0','#e88098'],['#fff0b0','#e8a000']];
+
+  // Generate stars for night mode
+  for(let i=0;i<100;i++){
+    const star=document.createElement('div'); star.className='star';
+    star.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*50}%;animation-delay:${Math.random()*2}s`;
+    starsContainer.appendChild(star);
+  }
+
+  // Trees (behind bushes)
+  const TREES=[
+    {l:'0%', img:'tree2.png', w:300, h:435},
+    {l:'5%', img:'tree1.png', w:315, h:450},
+    {l:'10%', img:'tree2.png', w:330, h:473},
+    {l:'15%', img:'tree2.png', w:330, h:480},
+    {l:'20%', img:'tree1.png', w:308, h:443},
+    {l:'25%', img:'tree2.png', w:360, h:540},
+    {l:'30%', img:'tree1.png', w:323, h:450},
+    {l:'35%', img:'tree1.png', w:308, h:443},
+    {l:'40%', img:'tree2.png', w:338, h:503},
+    {l:'45%', img:'tree1.png', w:293, h:428},
+    {l:'50%', img:'tree2.png', w:353, h:518},
+    {l:'55%', img:'tree2.png', w:345, h:510},
+    {l:'60%', img:'tree1.png', w:315, h:465},
+    {l:'65%', img:'tree2.png', w:338, h:495},
+    {l:'70%', img:'tree1.png', w:330, h:450},
+    {l:'75%', img:'tree1.png', w:323, h:458},
+    {l:'80%', img:'tree2.png', w:345, h:488},
+    {l:'85%', img:'tree1.png', w:300, h:435},
+    {l:'90%', img:'tree2.png', w:338, h:495},
+    {l:'95%', img:'tree1.png', w:315, h:450},
+    {l:'100%', img:'tree1.png', w:300, h:435}
+  ];
+  TREES.forEach(t=>{
+    const el=document.createElement('div'); el.className='tree';
+    el.style.cssText=`left:${t.l};bottom:10px;`;
+    el.innerHTML=`<img src="${t.img}" alt="tree" width="${t.w}" height="${t.h}">`;
+    treeStrip.appendChild(el);
+  });
+
+  // Bushes - in front of trees (using bushStrip container)
+  const BUSHES=[
+    {l:'0%', img:'bush1.png', w:80, h:60},
+    {l:'2%', img:'bush2.png', w:70, h:55},
+    {l:'4%', img:'bush3.png', w:75, h:58},
+    {l:'5%', img:'bush2.png', w:70, h:55},
+    {l:'7%', img:'bush1.png', w:78, h:62},
+    {l:'9%', img:'bush3.png', w:75, h:58},
+    {l:'11%', img:'bush2.png', w:72, h:54},
+    {l:'13%', img:'bush1.png', w:78, h:62},
+    {l:'15%', img:'bush3.png', w:76, h:59},
+    {l:'18%', img:'bush2.png', w:85, h:65},
+    {l:'20%', img:'bush1.png', w:73, h:56},
+    {l:'23%', img:'bush3.png', w:72, h:54},
+    {l:'25%', img:'bush2.png', w:74, h:57},
+    {l:'27%', img:'bush1.png', w:76, h:58},
+    {l:'29%', img:'bush3.png', w:74, h:56},
+    {l:'31%', img:'bush2.png', w:78, h:61},
+    {l:'34%', img:'bush1.png', w:74, h:56},
+    {l:'36%', img:'bush3.png', w:77, h:60},
+    {l:'39%', img:'bush2.png', w:88, h:68},
+    {l:'41%', img:'bush1.png', w:75, h:58},
+    {l:'44%', img:'bush3.png', w:78, h:60},
+    {l:'46%', img:'bush2.png', w:76, h:59},
+    {l:'48%', img:'bush1.png', w:79, h:62},
+    {l:'51%', img:'bush3.png', w:73, h:55},
+    {l:'53%', img:'bush2.png', w:80, h:63},
+    {l:'55%', img:'bush1.png', w:77, h:58},
+    {l:'56%', img:'bush3.png', w:80, h:62},
+    {l:'58%', img:'bush2.png', w:75, h:57},
+    {l:'61%', img:'bush1.png', w:84, h:64},
+    {l:'63%', img:'bush3.png', w:78, h:61},
+    {l:'65%', img:'bush2.png', w:74, h:56},
+    {l:'66%', img:'bush1.png', w:71, h:53},
+    {l:'68%', img:'bush3.png', w:76, h:60},
+    {l:'71%', img:'bush2.png', w:77, h:59},
+    {l:'73%', img:'bush1.png', w:75, h:57},
+    {l:'75%', img:'bush3.png', w:78, h:61},
+    {l:'77%', img:'bush2.png', w:74, h:58},
+    {l:'79%', img:'bush1.png', w:76, h:59},
+    {l:'81%', img:'bush3.png', w:86, h:66},
+    {l:'83%', img:'bush2.png', w:79, h:61},
+    {l:'85%', img:'bush1.png', w:77, h:58},
+    {l:'86%', img:'bush3.png', w:79, h:61},
+    {l:'88%', img:'bush2.png', w:75, h:56},
+    {l:'90%', img:'bush1.png', w:78, h:60},
+    {l:'91%', img:'bush3.png', w:68, h:52},
+    {l:'93%', img:'bush2.png', w:76, h:59},
+    {l:'95%', img:'bush1.png', w:74, h:57},
+    {l:'96%', img:'bush2.png', w:74, h:56},
+    {l:'98%', img:'bush3.png', w:72, h:54}
+  ];
+  BUSHES.forEach(b=>{
+    const el=document.createElement('div'); el.className='bush';
+    el.style.cssText=`left:${b.l};width:${b.w}px;height:${b.h}px;position:absolute;bottom:0;overflow:visible;`;
+    el.innerHTML=`<img src="${b.img}" alt="bush" width="${b.w}" height="${b.h}" style="display:block;object-fit:contain;opacity:1;">`;
+    bushStrip.appendChild(el);
+  });
+
+  // Tulips in grass strip
+  [5,14,24,34,45,56,66,76,86,95].forEach((pct,i)=>{
+    const t=document.createElement('div'); t.className='tulip';
+    const sw=(2+Math.random()*1.5).toFixed(1);
+    t.style.cssText=`left:${pct}%;--sw:${sw}s;animation-delay:${(Math.random()*1.2).toFixed(1)}s`;
+    const [c1,c2]=COLORS[i%COLORS.length];
+    t.innerHTML=`<div class="thead" style="background:radial-gradient(ellipse,${c1},${c2})"></div><div class="tstem"></div>`;
+    strip.appendChild(t);
+  });
+
+  // Enable night mode by default
+  $('scene').classList.add('night');
+
+  // Fit pole stick to road height
+  requestAnimationFrame(()=>{
+    const sceneH=$('scene').offsetHeight;
+    const roadH=sceneH*0.35;
+    $('pstick').style.height=Math.round(roadH*0.52)+'px';
+  });
+})();
+
+// ═══════════════════════════════════════════
+//  SAKURA PETALS
+// ═══════════════════════════════════════════
+const PET=['🌸','🌺','🌷','💮'];
+setInterval(()=>{
+  const p=document.createElement('div'); p.className='petal';
+  p.style.cssText=`left:${Math.random()*100}%;animation-duration:${5+Math.random()*6}s;animation-delay:${Math.random()*1.5}s;font-size:${10+Math.random()*10}px`;
+  p.textContent=PET[Math.floor(Math.random()*PET.length)];
+  $('sakura').appendChild(p);
+  setTimeout(()=>p.remove(),13000);
+},650);
+</script>
+</body>
+</html>
